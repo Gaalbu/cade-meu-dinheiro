@@ -1,10 +1,10 @@
-# Fio — livro-caixa pessoal
+# Cadê Meu Dinheiro? — livro-caixa pessoal
 
-Fio é uma plataforma multiusuário para transformar movimentos financeiros em contexto: despesas manuais ou capturadas do Android, categorização automática, orçamento, metas, tendências, recorrências e importação de extratos.
+**Cadê Meu Dinheiro?** é uma plataforma multiusuário para transformar a pergunta inevitável do fim do mês em contexto: despesas manuais ou capturadas do Android, categorização automática, orçamento, metas, tendências, recorrências e importação de extratos.
 
 O conceito visual é um **livro-caixa editorial**: papel mineral, tinta, linhas de régua, vermelho de carimbo e verde contábil. A interface usa composição assimétrica e densidade de informação, sem o padrão de cards brancos arredondados, sombras suaves ou gradientes azul/roxo.
 
-> Limitação importante: um site não pode ler as notificações do sistema do celular. No Android, Tasker, MacroDroid ou um app auxiliar recebe a permissão de acesso às notificações e envia o texto para o webhook autenticado do Fio.
+> Limitação importante: um site não pode ler as notificações do sistema do celular. No Android, Tasker, MacroDroid ou um app auxiliar recebe a permissão de acesso às notificações e envia o texto para o webhook autenticado do Cadê?.
 
 ## O que está implementado
 
@@ -87,8 +87,8 @@ Requisitos: Node.js 20.9+ e um projeto Supabase.
 1. Clone o repositório e instale:
 
    ```bash
-   git clone https://github.com/Gaalbu/Tudo-isso-.git
-   cd Tudo-isso-
+   git clone https://github.com/Gaalbu/cade-meu-dinheiro.git
+   cd cade-meu-dinheiro
    npm install
    ```
 
@@ -140,7 +140,7 @@ Endpoint:
 
 ```text
 POST https://SEU-DOMINIO.vercel.app/api/webhook/transacao
-Authorization: Bearer fio_wh_SEU_TOKEN
+Authorization: Bearer cade_wh_SEU_TOKEN
 Content-Type: text/plain
 Idempotency-Key: opcional-mas-recomendado
 
@@ -179,7 +179,7 @@ O webhook aceita `Authorization: Bearer ...` ou `X-Webhook-Token`. O `Idempotenc
 
 ```bash
 curl -i -X POST 'https://SEU-DOMINIO.vercel.app/api/webhook/transacao' \
-  -H 'Authorization: Bearer fio_wh_SEU_TOKEN' \
+  -H 'Authorization: Bearer cade_wh_SEU_TOKEN' \
   -H 'Content-Type: text/plain' \
   -H 'Idempotency-Key: teste-001' \
   --data 'Compra aprovada de R$ 15,90 em PADARIA PRIMAVERA'
@@ -189,7 +189,7 @@ curl -i -X POST 'https://SEU-DOMINIO.vercel.app/api/webhook/transacao' \
 
 O Tasker precisa da permissão **Acesso às notificações** no Android. Os nomes podem variar um pouco por versão/fabricante.
 
-1. No Fio, abra **Ajustes**, gere um token e copie também a URL mostrada.
+1. No Cadê?, abra **Ajustes**, gere um token e copie também a URL mostrada.
 2. No Tasker, abra **Profiles → + → Event → UI → Notification**.
 3. Em **Owner Application**, selecione somente os apps dos bancos/cartões desejados. Marque **New Only** se disponível, para reduzir atualizações duplicadas.
 4. Conceda o acesso às notificações quando o Android solicitar.
@@ -200,7 +200,7 @@ O Tasker precisa da permissão **Acesso às notificações** no Android. Os nome
    Method: POST
    URL: https://SEU-DOMINIO.vercel.app/api/webhook/transacao
    Headers:
-   Authorization:Bearer fio_wh_SEU_TOKEN
+   Authorization:Bearer cade_wh_SEU_TOKEN
    Content-Type:text/plain
    Idempotency-Key:%TIMES
    Body: %evtprm3
@@ -215,7 +215,7 @@ O Tasker documenta que os parâmetros do evento são expostos em `%evtprm` e que
 
 ## Configurar MacroDroid
 
-1. No Fio, gere o token em **Ajustes**.
+1. No Cadê?, gere o token em **Ajustes**.
 2. No MacroDroid, crie uma macro e escolha **Trigger → Notification → Notification Received**.
 3. Selecione apenas os apps bancários, marque **Ignore ongoing/persistent notifications** e **Prevent multiple triggers** quando disponíveis.
 4. Conceda a permissão de acesso às notificações.
@@ -225,13 +225,13 @@ O Tasker documenta que os parâmetros do evento são expostos em `%evtprm` e que
    Method: POST
    URL: https://SEU-DOMINIO.vercel.app/api/webhook/transacao
    Content type: text/plain
-   Header Authorization: Bearer fio_wh_SEU_TOKEN
+   Header Authorization: Bearer cade_wh_SEU_TOKEN
    Body: {not_title} {notification}
    ```
 
 6. Insira `{not_title}` e `{notification}` pelo botão de texto mágico (`…`), evitando erros de digitação.
 7. Salve o código de resposta HTTP em uma variável opcional: `201` indica criação; `401`, token incorreto/revogado; `422`, texto sem valor reconhecível.
-8. Teste e confira **Transações** no Fio.
+8. Teste e confira **Transações** no Cadê?.
 
 A documentação do MacroDroid confirma a exigência de acesso às notificações, os textos mágicos e os headers/body da ação HTTP: [Notification trigger](https://www.macrodroidforum.com/wiki/index.php?title=Trigger%3A_Notification) e [HTTP Request action](https://macrodroidforum.com/wiki/index.php/Action%3A_HTTP_Request).
 
@@ -247,7 +247,7 @@ A documentação do MacroDroid confirma a exigência de acesso às notificaçõe
 ## Deploy na Vercel
 
 1. Garanta que o repositório esteja no GitHub e com a branch `main` atualizada.
-2. Em [vercel.com/new](https://vercel.com/new), escolha **Import Git Repository** e selecione `Gaalbu/Tudo-isso-`.
+2. Em [vercel.com/new](https://vercel.com/new), escolha **Import Git Repository** e selecione `Gaalbu/cade-meu-dinheiro`.
 3. Framework Preset: **Next.js**. Root Directory: `./`. Install Command: `npm install`. Build Command: `npm run build`.
 4. Em **Environment Variables**, adicione as seis variáveis da tabela acima para Production, Preview e Development. Em produção, `NEXT_PUBLIC_APP_URL` deve ser a URL final sem barra, por exemplo `https://fio.exemplo.com` ou o domínio Vercel.
 5. Antes do primeiro tráfego de produção, aplique a migration com as credenciais do banco de produção:

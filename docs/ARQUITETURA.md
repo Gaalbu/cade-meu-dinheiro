@@ -17,7 +17,7 @@ A conexão Prisma é uma conexão privilegiada de servidor, portanto as verifica
 
 ### Webhook por usuário
 
-O token tem o formato `fio_wh_` + 32 bytes aleatórios em Base64URL. Somente `HMAC-SHA256(WEBHOOK_SECRET, token)` e um preview parcial ficam no banco. O índice único em `tokenHash` localiza a conta sem aceitar `userId` no payload.
+O token tem o formato `cade_wh_` + 32 bytes aleatórios em Base64URL. Somente `HMAC-SHA256(WEBHOOK_SECRET, token)` e um preview parcial ficam no banco. O índice único em `tokenHash` localiza a conta sem aceitar `userId` no payload.
 
 O fluxo é:
 

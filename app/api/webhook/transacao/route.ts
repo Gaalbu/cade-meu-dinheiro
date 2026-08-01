@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { hashWebhookToken } from "@/lib/webhook-token";
+import { hashWebhookToken, WEBHOOK_TOKEN_PREFIX } from "@/lib/webhook-token";
 import { parseNotification } from "@/lib/transactions/parse-notification";
 import { categorizeText } from "@/lib/transactions/categorize";
 
@@ -24,7 +24,7 @@ function bearerToken(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const token = bearerToken(request);
-    if (!token.startsWith("fio_wh_")) {
+    if (!token.startsWith(WEBHOOK_TOKEN_PREFIX)) {
       return NextResponse.json({ error: "Token ausente ou inválido." }, { status: 401 });
     }
 

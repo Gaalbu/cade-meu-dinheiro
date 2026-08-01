@@ -1,6 +1,6 @@
 import { createHmac, randomBytes } from "node:crypto";
 
-const TOKEN_PREFIX = "fio_wh_";
+export const WEBHOOK_TOKEN_PREFIX = "cade_wh_";
 
 function secret() {
   const value = process.env.WEBHOOK_SECRET;
@@ -11,7 +11,7 @@ function secret() {
 }
 
 export function generateWebhookToken() {
-  return `${TOKEN_PREFIX}${randomBytes(32).toString("base64url")}`;
+  return `${WEBHOOK_TOKEN_PREFIX}${randomBytes(32).toString("base64url")}`;
 }
 
 export function hashWebhookToken(token: string) {

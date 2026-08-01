@@ -15,7 +15,7 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Ponte / celular → livro" title="Configurações" note="O Android captura a notificação; o Fio recebe somente o texto enviado ao endpoint autenticado." />
+      <PageHeader eyebrow="Ponte / celular → livro" title="Configurações" note="O Android captura a notificação; o Cadê? recebe somente o texto enviado ao endpoint autenticado." />
       <section className="split-layout">
         <div>
           <div className="section-rule" style={{ marginTop: 0 }}><h2>Tokens de captura</h2><span>sigilo por dispositivo</span></div>

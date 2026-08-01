@@ -3,8 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Fio — dinheiro em perspectiva",
-    template: "%s · Fio",
+    default: "Cadê Meu Dinheiro? — dinheiro em perspectiva",
+    template: "%s · Cadê Meu Dinheiro?",
   },
   description: "Livro-caixa pessoal com captura automática, categorias, orçamentos e metas.",
 };
