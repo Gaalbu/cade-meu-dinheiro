@@ -107,7 +107,13 @@ export async function POST(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: "Payload inválido.", details: error.issues }, { status: 400 });
     }
-    const message = error instanceof Error ? error.message : "Erro interno.";
-    return NextResponse.json({ error: message }, { status: 422 });
+    if (error instanceof SyntaxError) {
+      return NextResponse.json({ error: "JSON inválido." }, { status: 400 });
+    }
+    // Do not expose database, parser or configuration details at this public boundary.
+    console.error("Webhook transaction processing failed", {
+      errorType: error instanceof Error ? error.name : "unknown",
+    });
+    return NextResponse.json({ error: "Não foi possível processar a notificação." }, { status: 422 });
   }
 }
