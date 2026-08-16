@@ -49,7 +49,7 @@ export default async function EditTransactionPage({ params }: { params: Promise<
         </label>
         {transaction.rawNotification && (
           <div className="field full">
-            <label>Notificação original</label>
+            <span className="field-label">Notificação original</span>
             <code className="code-line">{transaction.rawNotification}</code>
           </div>
         )}

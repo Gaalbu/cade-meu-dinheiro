@@ -21,6 +21,47 @@ function bearerToken(request: NextRequest) {
   return request.headers.get("x-webhook-token")?.trim() ?? "";
 }
 
+async function resolveWebhookToken(token: string) {
+  return prisma.webhookToken.findFirst({
+    where: {
+      tokenHash: hashWebhookToken(token),
+      revokedAt: null,
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+    },
+  });
+}
+
+async function readWebhookPayload(request: NextRequest) {
+  const contentType = request.headers.get("content-type") ?? "";
+  if (contentType.includes("application/json")) return request.json();
+  return {
+    text: await request.text(),
+    occurredAt: request.headers.get("x-occurred-at") || undefined,
+    packageName: request.headers.get("x-package-name") || undefined,
+    idempotencyKey: request.headers.get("idempotency-key") || undefined,
+  };
+}
+
+function buildImportFingerprint(
+  body: z.infer<typeof payloadSchema>,
+  parsed: ReturnType<typeof parseNotification>,
+  idempotencyHeader: string | null,
+) {
+  const idempotencySeed =
+    body.idempotencyKey ?? idempotencyHeader ?? `${body.text}|${parsed.transactedAt.toISOString().slice(0, 16)}`;
+  return createHash("sha256").update(`webhook|${idempotencySeed}`).digest("hex");
+}
+
+async function categorizeIncomingTransaction(userId: string, parsed: ReturnType<typeof parseNotification>, text: string) {
+  const [categories, rules] = await Promise.all([
+    prisma.category.findMany({ where: { userId } }),
+    prisma.categoryRule.findMany({ where: { userId } }),
+  ]);
+  const fallback = categories.find((category) => category.slug === "outros");
+  if (!fallback) throw new Error("A conta ainda não possui a categoria Outros.");
+  return categorizeText(`${parsed.merchant} ${text}`, rules, fallback.id);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const token = bearerToken(request);
@@ -28,40 +69,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Token ausente ou inválido." }, { status: 401 });
     }
 
-    const tokenRecord = await prisma.webhookToken.findFirst({
-      where: {
-        tokenHash: hashWebhookToken(token),
-        revokedAt: null,
-        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
-      },
-    });
+    const tokenRecord = await resolveWebhookToken(token);
     if (!tokenRecord) return NextResponse.json({ error: "Token inválido ou revogado." }, { status: 401 });
 
-    const contentType = request.headers.get("content-type") ?? "";
-    const rawBody = contentType.includes("application/json")
-      ? await request.json()
-      : {
-          text: await request.text(),
-          occurredAt: request.headers.get("x-occurred-at") || undefined,
-          packageName: request.headers.get("x-package-name") || undefined,
-          idempotencyKey: request.headers.get("idempotency-key") || undefined,
-        };
+    const rawBody = await readWebhookPayload(request);
     const body = payloadSchema.parse(rawBody);
     const fallbackDate = body.occurredAt ? new Date(body.occurredAt) : new Date();
     const parsed = parseNotification(body.text, fallbackDate);
 
-    const [categories, rules] = await Promise.all([
-      prisma.category.findMany({ where: { userId: tokenRecord.userId } }),
-      prisma.categoryRule.findMany({ where: { userId: tokenRecord.userId } }),
-    ]);
-    const fallback = categories.find((category) => category.slug === "outros");
-    if (!fallback) throw new Error("A conta ainda não possui a categoria Outros.");
-    const categoryId = categorizeText(`${parsed.merchant} ${body.text}`, rules, fallback.id);
-    const idempotencySeed =
-      body.idempotencyKey ??
-      request.headers.get("idempotency-key") ??
-      `${body.text}|${parsed.transactedAt.toISOString().slice(0, 16)}`;
-    const fingerprint = createHash("sha256").update(`webhook|${idempotencySeed}`).digest("hex");
+    const categoryId = await categorizeIncomingTransaction(tokenRecord.userId, parsed, body.text);
+    const fingerprint = buildImportFingerprint(body, parsed, request.headers.get("idempotency-key"));
 
     const transaction = await prisma.transaction.upsert({
       where: {
