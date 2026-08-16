@@ -16,7 +16,7 @@ export default async function HomePage() {
         <div className="landing-copy">
           <div>
             <p className="eyebrow">Finanças pessoais, sem ruído</p>
-            <h1>Veja para onde o dinheiro <em>foi.</em></h1>
+            <h1>Veja para onde o dinheiro <span className="accent">foi.</span></h1>
             <p>
               Um livro-caixa que transforma notificações do banco em contexto: categorias,
               tendências, limites e metas — cada pessoa no seu próprio espaço.

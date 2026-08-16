@@ -59,7 +59,7 @@ function cleanMerchant(value: string) {
 }
 
 function extractMerchant(text: string) {
-  const explicit = text.match(/(?:estabelecimento|lojista|favorecido|recebedor)\s*[:\-]\s*([^;\n,.]{2,80})/i);
+  const explicit = text.match(/(?:estabelecimento|lojista|favorecido|recebedor)\s*[:-]\s*([^;\n,.]{2,80})/i);
   if (explicit) return cleanMerchant(explicit[1]);
 
   const candidates = Array.from(
